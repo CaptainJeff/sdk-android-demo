@@ -18,6 +18,9 @@ import android.widget.Toast;
 import com.qingniu.qnble.demo.R;
 import com.qingniu.qnble.demo.bean.User;
 import com.qingniu.qnble.demo.util.UserConst;
+import com.qingniu.scale.config.DecoderAdapterManager;
+import com.qingniu.scale.config.DecoderConfigAdapter;
+import com.qingniu.scale.model.ScaleInfo;
 import com.yolanda.health.qnblesdk.constant.CheckStatus;
 import com.yolanda.health.qnblesdk.constant.QNIndicator;
 import com.yolanda.health.qnblesdk.constant.QNScaleStatus;
@@ -174,6 +177,12 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
             public void onGetUnsteadyWeight(QNBleDevice device, double weight) {
                 Log.d("ConnectActivity", "体重是:" + weight);
                 mWeightTv.setText(initWeight(weight));
+                DecoderConfigAdapter adapter = DecoderAdapterManager.getInstance().getConfigAdapter();
+                if (adapter != null) {//连接状态，会返回秤的信息数据
+                    //为null表示获取信息失败
+                    ScaleInfo info = adapter.fetchScaleInfo();
+                    Log.d("ConnectActivity", "info:" + info);
+                }
             }
 
             @Override
