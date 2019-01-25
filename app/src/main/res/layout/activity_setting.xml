@@ -22,6 +22,54 @@
 
         <TextView style="@style/divide_line"/>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/user_shape_explain"
+                style="@style/user_small_text"
+                android:text="用户体型"/>
+
+            <Spinner
+                android:id="@+id/user_shape_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/user_shape_explain"
+                android:layout_toRightOf="@+id/user_shape_explain"
+                android:entries="@array/user_shape_des">
+
+            </Spinner>
+
+        </RelativeLayout>
+
+        <TextView style="@style/divide_line"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/user_goal_explain"
+                style="@style/user_small_text"
+                android:text="用户目标"/>
+
+            <Spinner
+                android:id="@+id/user_goal_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/user_goal_explain"
+                android:layout_toRightOf="@+id/user_goal_explain"
+                android:entries="@array/user_goal_des">
+
+            </Spinner>
+
+        </RelativeLayout>
+
+        <TextView style="@style/divide_line"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -200,6 +248,47 @@
             <TextView
                 style="@style/user_explain_text"
                 android:text="@string/user_height_explain"/>
+        </LinearLayout>
+
+        <TextView style="@style/divide_line"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/user_weight_explain"
+                    style="@style/user_small_text"
+                    android:text="体重"/>
+
+                <ImageView
+                    android:id="@+id/user_weight_arrow"
+                    style="@style/user_arrow_image"
+                    android:layout_marginStart="30dp"
+                    android:src="@drawable/system_item_arrow"/>
+
+                <EditText
+                    android:id="@+id/user_weight_et"
+                    android:layout_width="80dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginEnd="30dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_toStartOf="@+id/user_weight_arrow"
+                    android:background="@drawable/edittext_background"
+                    android:inputType="numberDecimal"
+                    android:text="65.0"/>
+
+            </RelativeLayout>
+
+            <TextView
+                style="@style/user_explain_text"
+                android:text="@string/user_weight_explain"/>
         </LinearLayout>
 
         <TextView style="@style/divide_line"/>
@@ -472,6 +561,7 @@
             android:layout_margin="10dp"
             android:text="系统扫描"
             android:textSize="18sp"/>
+
     </LinearLayout>
 
 </ScrollView>

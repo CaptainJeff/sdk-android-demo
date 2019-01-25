@@ -37,19 +37,23 @@
         <activity
             android:name=".view.ScanActivity"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".view.SystemScanActivity"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name=".view.ConnectActivity"
+            android:name=".view.ScaleConnectActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name=".wrist.WristConnectActivity"
             android:screenOrientation="portrait"/>
 
         <!--SDK中需要申请的服务-->
         <service android:name="com.qingniu.qnble.scanner.BleScanService"/>
         <service android:name="com.qingniu.scale.measure.ble.ScaleBleService"/>
         <service android:name="com.qingniu.scale.measure.broadcast.ScaleBroadcastService"/>
+        <service android:name="com.qingniu.wrist.ble.WristBleService"/>
     </application>
 
 </manifest>

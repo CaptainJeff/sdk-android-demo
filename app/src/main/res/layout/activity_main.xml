@@ -77,11 +77,11 @@
         <TextView
             android:id="@+id/nameTv"
             android:layout_width="0dp"
+            android:gravity="center_horizontal"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="20dp"
             android:layout_weight="2"
-            android:gravity="center_horizontal"
             android:text="名称"/>
 
         <TextView

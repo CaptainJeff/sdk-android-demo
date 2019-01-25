@@ -14,18 +14,30 @@ import com.yolanda.health.qnblesdk.out.QNBleApi;
  */
 
 public class BaseApplication extends Application {
+
+    public String mAppId = "123456789";
+
     @Override
     public void onCreate() {
         super.onCreate();
         String encryptPath = "file:///android_asset/123456789.qn";
-        QNLogUtils.setLogEnable(BuildConfig.DEBUG);//设置日志打印开关，默认关闭
-//        QNLogUtils.setWriteEnable(true);//设置日志写入文件开关，默认关闭
+//
+        QNLogUtils.setLogEnable(true);
         QNBleApi mQNBleApi = QNBleApi.getInstance(this);
-        mQNBleApi.initSdk("123456789", encryptPath, new QNResultCallback() {
+        mQNBleApi.initSdk(mAppId, encryptPath, new QNResultCallback() {
             @Override
             public void onResult(int code, String msg) {
                 Log.d("BaseApplication", "初始化文件" + msg);
             }
         });
+
+        instance = this;
+
+    }
+
+    private static BaseApplication instance;
+
+    public static BaseApplication getInstance() {
+        return instance;
     }
 }

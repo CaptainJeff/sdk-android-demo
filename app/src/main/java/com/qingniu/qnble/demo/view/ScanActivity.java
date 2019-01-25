@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.qingniu.qnble.demo.BaseApplication;
 import com.qingniu.qnble.demo.R;
 import com.qingniu.qnble.demo.SettingActivity;
 import com.qingniu.qnble.demo.bean.Config;
@@ -24,6 +25,10 @@ import com.qingniu.qnble.demo.bean.User;
 import com.qingniu.qnble.demo.util.AndroidPermissionCenter;
 import com.qingniu.qnble.demo.util.ToastMaker;
 import com.qingniu.qnble.demo.util.UserConst;
+import com.qingniu.qnble.demo.wrist.WristConnectActivity;
+import com.qingniu.qnble.utils.QNLogUtils;
+import com.qingniu.scale.constant.BleConst;
+import com.yolanda.health.qnblesdk.constant.CheckStatus;
 import com.yolanda.health.qnblesdk.listener.QNBleDeviceDiscoveryListener;
 import com.yolanda.health.qnblesdk.listener.QNResultCallback;
 import com.yolanda.health.qnblesdk.out.QNBleApi;
@@ -113,8 +118,10 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
 
         mQNBleApi = QNBleApi.getInstance(this);
         //动态申请权限(Android6.0以后需要)
+//        if ()
         AndroidPermissionCenter.verifyPermissions(this);
-        initIntent();
+        mUser = getIntent().getParcelableExtra(UserConst.USER);
+        mConfig = getIntent().getParcelableExtra(UserConst.CONFIG);
         initData();
 
         mListView.setAdapter(this.listAdapter);
@@ -130,25 +137,29 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
 
             @Override
             public void onStartScan() {
-                Log.d("ScanActivity", "onStartScan");
+                QNLogUtils.log("ScanActivity", "onStartScan");
                 isScanning = true;
             }
 
             @Override
             public void onStopScan() {
-                Log.d("ScanActivity", "onStopScan");
+                QNLogUtils.log("ScanActivity", "onStopScan");
                 isScanning = false;
+
             }
 
             @Override
             public void onScanFail(int code) {
-                Log.d("ScanActivity", "onScanFail:" + code);
+                isScanning = false;
+                QNLogUtils.log("ScanActivity", "onScanFail:" + code);
+                Toast.makeText(ScanActivity.this, "扫描异常，请重启手机蓝牙!", Toast.LENGTH_SHORT).show();
             }
         });
 
     }
 
     private void initData() {
+        mScanAppid.setText("AppId : " + BaseApplication.getInstance().mAppId);
         QNConfig mQnConfig = mQNBleApi.getConfig();//获取上次设置的对象,未设置获取的是默认对象
         mQnConfig.setAllowDuplicates(mConfig.isAllowDuplicates());
         mQnConfig.setDuration(mConfig.getDuration());
@@ -163,17 +174,6 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
                 Log.d("ScanActivity", "initData:" + s);
             }
         });
-
-        mScanAppid.setText("UserId : " + mUser.getUserId());
-    }
-
-    private void initIntent() {
-        Intent intent = getIntent();
-        if (intent != null) {
-            mUser = intent.getParcelableExtra(UserConst.USER);
-            mConfig = intent.getParcelableExtra(UserConst.CONFIG);
-        }
-
     }
 
     @Override
@@ -206,7 +206,9 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
         mQNBleApi.stopBleDeviceDiscovery(new QNResultCallback() {
             @Override
             public void onResult(int code, String msg) {
-
+                if (code == CheckStatus.OK.getCode()) {
+                    isScanning = false;
+                }
             }
         });
     }
@@ -223,9 +225,12 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void connectDevice(QNBleDevice device) {
-        startActivity(ConnectActivity.getCallIntent(this, mUser, device));
+        if (device.getScaleCategory() == BleConst.WRIST_BLE_DEFAULT) {
+            startActivity(WristConnectActivity.getCallIntent(this, mUser, device));
+        } else {
+            startActivity(ScaleConnectActivity.getCallIntent(this, mUser, device));
+        }
     }
-
 
     @OnClick({R.id.scan_setting, R.id.scanBtn, R.id.stopBtn})
     public void onViewClicked(View view) {
@@ -253,7 +258,6 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
                 break;
         }
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

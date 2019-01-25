@@ -6,10 +6,12 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.qingniu.qnble.demo.bean.Config;
@@ -21,12 +23,12 @@ import com.qingniu.qnble.demo.util.ToastMaker;
 import com.qingniu.qnble.demo.view.ScanActivity;
 import com.qingniu.qnble.demo.view.SystemScanActivity;
 import com.yolanda.health.qnblesdk.constant.QNInfoConst;
-import com.yolanda.health.qnblesdk.out.QNBleApi;
 
 import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * author: yolanda-XY
@@ -36,6 +38,11 @@ import butterknife.ButterKnife;
  */
 
 public class SettingActivity extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener, View.OnClickListener {
+
+    @BindView(R.id.user_shape_spinner)
+    Spinner shapeSpn;
+    @BindView(R.id.user_goal_spinner)
+    Spinner goalSpn;
 
     @BindView(R.id.user_id_edt)
     EditText mUserIdEdt;
@@ -72,6 +79,10 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
     @BindView(R.id.btn_system_scan)
     Button btn_system_scan;
 
+    //体重数据
+    @BindView(R.id.user_weight_et)
+    EditText user_weight_et;
+
     @BindView(R.id.scan_timeEt)
     EditText mScanEt;
     @BindView(R.id.scan_out_timeEt)
@@ -85,7 +96,6 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
     private Date mBirthday = null; //用户生日
 
     private User mUser;
-    private QNBleApi mQnBleApi;
 
     public static Intent getCallIntent(Context context) {
         return new Intent(context, SettingActivity.class);
@@ -95,11 +105,10 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
-        mQnBleApi = QNBleApi.getInstance(this);
         ButterKnife.bind(this);
         initView();
-        initListener();
         initData();
+        initListener();
     }
 
     private void initData() {
@@ -123,16 +132,45 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
         mUserBirthdayTv.setOnClickListener(this);
         mSure.setOnClickListener(this);
         btn_system_scan.setOnClickListener(this);
+
+        shapeSpn.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mUser.setChoseShape(position);
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mUser.setChoseShape(0);
+
+            }
+        });
+
+        goalSpn.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mUser.setChoseGoal(position);
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mUser.setChoseGoal(0);
+
+            }
+        });
+
     }
 
     @Override
     public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
         switch (checkedId) {
             case R.id.user_male_rb:
-                mGender = "male";
+                mGender = QNInfoConst.GENDER_MAN;
                 break;
             case R.id.user_female_rb:
-                mGender = "female";
+                mGender = QNInfoConst.GENDER_WOMAN;
                 break;
             case R.id.normal_calc_rb:
                 mUser.setAthleteType(QNInfoConst.CALC_NORMAL);
@@ -219,6 +257,14 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
 
     private boolean checkInfo() {
         String userId = mUserIdEdt.getText().toString().trim();
+        double weightValue = 0;
+        try {
+            weightValue = Double.parseDouble(user_weight_et.getText().toString().trim());
+        } catch (Exception e) {
+            e.printStackTrace();
+            ToastMaker.show(this, "请填写正确的体重数据");
+            return true;
+        }
         int scanTime = 0;
         try {
             scanTime = Integer.parseInt(mScanEt.getText().toString().trim());
@@ -235,7 +281,6 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
             ToastMaker.show(this, "请填写正确的扫描超时时间");
             return true;
         }
-
         long connectOutTime = 0L;
         try {
             connectOutTime = Long.parseLong(mConnectOutEt.getText().toString().trim());
@@ -267,6 +312,7 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
 
         mUser.setUserId(userId);
         mUser.setHeight(mHeight);
+        mUser.setWeight(weightValue);
         mUser.setGender(mGender);
         mUser.setBirthDay(mBirthday);
 
@@ -275,4 +321,5 @@ public class SettingActivity extends AppCompatActivity implements RadioGroup.OnC
         mBleConfig.setConnectOutTime(connectOutTime);
         return false;
     }
+
 }

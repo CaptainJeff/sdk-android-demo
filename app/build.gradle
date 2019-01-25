@@ -58,9 +58,18 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile "com.android.support:appcompat-v7:$ANDROID_SUPPORT_VERSION"
+    compile "com.android.support:recyclerview-v7:$ANDROID_SUPPORT_VERSION"
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha8'
     compile 'com.jakewharton:butterknife:8.5.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
     testCompile 'junit:junit:4.12'
-    compile files('libs/qnsdk-0.5.1.jar')
+    compile files('libs/qnsdk-1.0.0-beta.1.jar')
+
+    //rxjava依赖--start
+    compile("io.reactivex.rxjava2:rxandroid:$RX_JAVA2_VERSION") {
+        exclude module: "rxjava"
+        exclude module: "okhttp"
+    }
+    compile "io.reactivex.rxjava2:rxjava:$RX_JAVA2_VERSION"
+    //rxjava依赖--end
 }
