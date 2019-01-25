@@ -1,7 +1,5 @@
 # 轻牛蓝牙Android SDK 
 
-## 最新版本 `v0.5.1` [下载地址](https://github.com/YolandaQingniu/sdk-android-demo/releases/download/v0.5.1/qnsdk-0.5.1-Android.zip)
-
 ## SDK文件说明
 ### 统一引入
 #### 导入demo项目的lib中的jar文件(qnsdk-xxx.jar)和对应的so文件
