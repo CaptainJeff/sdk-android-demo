@@ -21,9 +21,10 @@ import com.qingniu.qnble.demo.util.UserConst;
 import com.qingniu.scale.config.DecoderAdapterManager;
 import com.qingniu.scale.config.DecoderConfigAdapter;
 import com.qingniu.scale.model.ScaleInfo;
-import com.yolanda.health.qnblesdk.constant.CheckStatus;
 import com.yolanda.health.qnblesdk.constant.QNIndicator;
 import com.yolanda.health.qnblesdk.constant.QNScaleStatus;
+import com.yolanda.health.qnblesdk.constant.UserGoal;
+import com.yolanda.health.qnblesdk.constant.UserShape;
 import com.yolanda.health.qnblesdk.listener.QNBleConnectionChangeListener;
 import com.yolanda.health.qnblesdk.listener.QNDataListener;
 import com.yolanda.health.qnblesdk.listener.QNResultCallback;
@@ -88,10 +89,6 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
 
     private void initData() {
         initIntent();
-        /**
-         * SDK中的数据以及状态监听，如果不使用一定需要设置为null；
-         * 否则下次设置监听，即使是使用的同一个对象，也会回调多次
-         * */
         initBleConnectStatus();
         initUserData(); //设置数据监听器,返回数据,需在连接当前设备前设置
         //已经连接设备先断开设备,再连接
@@ -136,10 +133,8 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
             //出现了连接错误，错误码参考附表
             @Override
             public void onConnectError(QNBleDevice device, int errorCode) {
-                setBleStatus(QNScaleStatus.STATE_DISCONNECTING);
-                if (errorCode == CheckStatus.ERROR_BLE_CONNECT_OVERTIME.getCode()) {
-                    Toast.makeText(ConnectActivity.this, "连接设备超时", Toast.LENGTH_SHORT).show();
-                }
+                Log.d("ConnectActivity", "onConnectError:" + errorCode);
+                setBleStatus(QNScaleStatus.STATE_DISCONNECTED);
             }
 
             //测量过程中的连接状态
@@ -161,8 +156,58 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private QNUser createQNUser() {
+        UserShape userShape;
+        switch (mUser.getChoseShape()) {
+            case 0:
+                userShape = UserShape.SHAPE_NONE;
+                break;
+            case 1:
+                userShape = UserShape.SHAPE_SLIM;
+                break;
+            case 2:
+                userShape = UserShape.SHAPE_NORMAL;
+                break;
+            case 3:
+                userShape = UserShape.SHAPE_STRONG;
+                break;
+            case 4:
+                userShape = UserShape.SHAPE_PLIM;
+                break;
+            default:
+                userShape = UserShape.SHAPE_NONE;
+                break;
+        }
+
+        UserGoal userGoal;
+        switch (mUser.getChoseGoal()) {
+            case 0:
+                userGoal = UserGoal.GOAL_NONE;
+                break;
+            case 1:
+                userGoal = UserGoal.GOAL_LOSE_FAT;
+                break;
+            case 2:
+                userGoal = UserGoal.GOAL_STAY_HEALTH;
+                break;
+            case 3:
+                userGoal = UserGoal.GOAL_GAIN_MUSCLE;
+                break;
+            case 4:
+                userGoal = UserGoal.POWER_OFTEN_EXERCISE;
+                break;
+            case 5:
+                userGoal = UserGoal.POWER_LITTLE_EXERCISE;
+                break;
+            case 6:
+                userGoal = UserGoal.POWER_OFTEN_RUN;
+                break;
+            default:
+                userGoal = UserGoal.GOAL_NONE;
+                break;
+        }
+
         return mQNBleApi.buildUser(mUser.getUserId(),
-                mUser.getHeight(), mUser.getGender(), mUser.getBirthDay(), mUser.getAthleteType(), new QNResultCallback() {
+                mUser.getHeight(), mUser.getGender(), mUser.getBirthDay(), mUser.getAthleteType(), userShape, userGoal, new QNResultCallback() {
                     @Override
                     public void onResult(int code, String msg) {
                         Log.d("ConnectActivity", "创建用户信息返回:" + msg);
@@ -177,18 +222,19 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
             public void onGetUnsteadyWeight(QNBleDevice device, double weight) {
                 Log.d("ConnectActivity", "体重是:" + weight);
                 mWeightTv.setText(initWeight(weight));
-                DecoderConfigAdapter adapter = DecoderAdapterManager.getInstance().getConfigAdapter();
-                if (adapter != null) {//连接状态，会返回秤的信息数据
-                    //为null表示获取信息失败
-                    ScaleInfo info = adapter.fetchScaleInfo();
-                    Log.d("ConnectActivity", "info:" + info);
-                }
+
             }
 
             @Override
             public void onGetScaleData(QNBleDevice device, QNScaleData data) {
                 Log.d("ConnectActivity", "收到测量数据");
                 onReceiveScaleData(data);
+                QNScaleItemData fatValue = data.getItem(QNIndicator.TYPE_SUBFAT);
+                if (fatValue != null) {
+                    String value = fatValue.getValue() + "";
+                    Log.d("ConnectActivity", "收到皮下脂肪数据:" + value);
+                }
+//                Log.d("ConnectActivity", "收到体脂肪:"+data.getItem(QNIndicator.TYPE_BODYFAT).getValue());
             }
 
             @Override
@@ -196,6 +242,7 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
                 Log.d("ConnectActivity", "收到存储数据");
                 if (storedDataList != null && storedDataList.size() > 0) {
                     QNScaleStoreData data = storedDataList.get(0);
+                    Log.d("ConnectActivity", "收到存储数据:" + data.getWeight());
                     QNUser qnUser = createQNUser();
                     data.setUser(qnUser);
                     QNScaleData qnScaleData = data.generateScaleData();
@@ -204,8 +251,10 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
             }
 
             @Override
-            public void onGetElectric(QNBleDevice qnBleDevice, int i) {
-                Log.d("ConnectActivity", "收到电量信息:" + i);
+            public void onGetElectric(QNBleDevice device, int electric) {
+                String text = "收到电池电量百分比:" + electric;
+                Log.d("ConnectActivity", text);
+                Toast.makeText(ConnectActivity.this, text, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -390,7 +439,6 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void doDisconnect() {
-        //没有断开连接的方法
         mQNBleApi.disconnectDevice(mBleDevice, new QNResultCallback() {
             @Override
             public void onResult(int code, String msg) {

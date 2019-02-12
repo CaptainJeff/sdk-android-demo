@@ -27,6 +27,7 @@ import com.qingniu.qnble.demo.util.AndroidPermissionCenter;
 import com.qingniu.qnble.demo.util.ToastMaker;
 import com.qingniu.qnble.demo.util.UserConst;
 import com.qingniu.qnble.utils.BleUtils;
+import com.qingniu.qnble.utils.QNLogUtils;
 import com.yolanda.health.qnblesdk.constant.CheckStatus;
 import com.yolanda.health.qnblesdk.listener.QNResultCallback;
 import com.yolanda.health.qnblesdk.out.QNBleApi;
@@ -62,12 +63,11 @@ public class SystemScanActivity extends AppCompatActivity implements AdapterView
     private Config mConfig;
     private boolean isScanning;
 
-    public static Intent getCallIntent(Context context, User user, Config config) {
+    public static Intent getCallIntent(Context context, User user, Config mConfig) {
         return new Intent(context, SystemScanActivity.class)
-                .putExtra(UserConst.CONFIG, config)
+                .putExtra(UserConst.CONFIG, mConfig)
                 .putExtra(UserConst.USER, user);
     }
-
 
     private BaseAdapter listAdapter = new BaseAdapter() {
         @Override
@@ -107,8 +107,8 @@ public class SystemScanActivity extends AppCompatActivity implements AdapterView
         }
     };
 
-    private List<QNBleDevice> devices = new ArrayList<>();
     private List<String> macList = new ArrayList<>();
+    private List<QNBleDevice> devices = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,10 +127,10 @@ public class SystemScanActivity extends AppCompatActivity implements AdapterView
 
         mListView.setOnItemClickListener(this);
 
-
     }
 
     private void initData() {
+        mScanAppid.setText("UserId : " + mUser.getUserId());
         QNConfig mQnConfig = mQNBleApi.getConfig();//获取上次设置的对象,未设置获取的是默认对象
         mQnConfig.setAllowDuplicates(mConfig.isAllowDuplicates());
         mQnConfig.setDuration(mConfig.getDuration());
@@ -145,8 +145,6 @@ public class SystemScanActivity extends AppCompatActivity implements AdapterView
                 Log.d("ScanActivity", "initData:" + s);
             }
         });
-
-        mScanAppid.setText("UserId : " + mUser.getUserId());
     }
 
     @Override
@@ -172,18 +170,23 @@ public class SystemScanActivity extends AppCompatActivity implements AdapterView
 
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+
+            if (device == null) {
+                return;
+            }
             QNBleDevice qnBleDevice = mQNBleApi.buildDevice(device, rssi, scanRecord, new QNResultCallback() {
                 @Override
                 public void onResult(int code, String msg) {
                     if (code != CheckStatus.OK.getCode()) {
-                        Log.d("LeScanCallback", msg);
+                        QNLogUtils.log("LeScanCallback", msg);
                     }
                 }
             });
 
             if (qnBleDevice != null && !macList.contains(qnBleDevice.getMac())) {
-                devices.add(qnBleDevice);
+                QNLogUtils.log("LeScanCallback", qnBleDevice.getMac());
                 macList.add(qnBleDevice.getMac());
+                devices.add(qnBleDevice);
                 listAdapter.notifyDataSetChanged();
             }
         }

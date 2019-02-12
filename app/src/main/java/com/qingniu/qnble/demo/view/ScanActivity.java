@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,11 +25,19 @@ import com.qingniu.qnble.demo.bean.User;
 import com.qingniu.qnble.demo.util.AndroidPermissionCenter;
 import com.qingniu.qnble.demo.util.ToastMaker;
 import com.qingniu.qnble.demo.util.UserConst;
+import com.qingniu.qnble.utils.QNLogUtils;
+import com.yolanda.health.qnblesdk.constant.CheckStatus;
+import com.yolanda.health.qnblesdk.constant.QNIndicator;
+import com.yolanda.health.qnblesdk.constant.UserGoal;
+import com.yolanda.health.qnblesdk.constant.UserShape;
 import com.yolanda.health.qnblesdk.listener.QNBleDeviceDiscoveryListener;
 import com.yolanda.health.qnblesdk.listener.QNResultCallback;
 import com.yolanda.health.qnblesdk.out.QNBleApi;
 import com.yolanda.health.qnblesdk.out.QNBleDevice;
 import com.yolanda.health.qnblesdk.out.QNConfig;
+import com.yolanda.health.qnblesdk.out.QNShareData;
+import com.yolanda.health.qnblesdk.out.QNUser;
+import com.yolanda.health.qnblesdk.out.QNUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +63,11 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
     @BindView(R.id.listView)
     ListView mListView;
 
+    @BindView(R.id.qr_data_et)
+    EditText qr_data_et;
+    @BindView(R.id.qr_data_tv)
+    TextView qr_data_tv;
+
     private QNBleApi mQNBleApi;
     private User mUser;
     private Config mConfig;
@@ -64,6 +78,8 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
                 .putExtra(UserConst.CONFIG, mConfig)
                 .putExtra(UserConst.USER, user);
     }
+
+    private static final String TAG = "ScanActivity";
 
     private BaseAdapter listAdapter = new BaseAdapter() {
         @Override
@@ -113,8 +129,10 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
 
         mQNBleApi = QNBleApi.getInstance(this);
         //动态申请权限(Android6.0以后需要)
+//        if ()
         AndroidPermissionCenter.verifyPermissions(this);
-        initIntent();
+        mUser = getIntent().getParcelableExtra(UserConst.USER);
+        mConfig = getIntent().getParcelableExtra(UserConst.CONFIG);
         initData();
 
         mListView.setAdapter(this.listAdapter);
@@ -130,25 +148,29 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
 
             @Override
             public void onStartScan() {
-                Log.d("ScanActivity", "onStartScan");
+                QNLogUtils.log("ScanActivity", "onStartScan");
                 isScanning = true;
             }
 
             @Override
             public void onStopScan() {
-                Log.d("ScanActivity", "onStopScan");
+                QNLogUtils.log("ScanActivity", "onStopScan");
                 isScanning = false;
+
             }
 
             @Override
             public void onScanFail(int code) {
-                Log.d("ScanActivity", "onScanFail:" + code);
+                isScanning = false;
+                QNLogUtils.log("ScanActivity", "onScanFail:" + code);
+                Toast.makeText(ScanActivity.this, "扫描异常，请重启手机蓝牙!", Toast.LENGTH_SHORT).show();
             }
         });
 
     }
 
     private void initData() {
+        mScanAppid.setText("UserId : " + mUser.getUserId());
         QNConfig mQnConfig = mQNBleApi.getConfig();//获取上次设置的对象,未设置获取的是默认对象
         mQnConfig.setAllowDuplicates(mConfig.isAllowDuplicates());
         mQnConfig.setDuration(mConfig.getDuration());
@@ -163,17 +185,6 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
                 Log.d("ScanActivity", "initData:" + s);
             }
         });
-
-        mScanAppid.setText("UserId : " + mUser.getUserId());
-    }
-
-    private void initIntent() {
-        Intent intent = getIntent();
-        if (intent != null) {
-            mUser = intent.getParcelableExtra(UserConst.USER);
-            mConfig = intent.getParcelableExtra(UserConst.CONFIG);
-        }
-
     }
 
     @Override
@@ -206,7 +217,9 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
         mQNBleApi.stopBleDeviceDiscovery(new QNResultCallback() {
             @Override
             public void onResult(int code, String msg) {
-
+                if (code == CheckStatus.OK.getCode()) {
+                    isScanning = false;
+                }
             }
         });
     }
@@ -227,7 +240,7 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
 
-    @OnClick({R.id.scan_setting, R.id.scanBtn, R.id.stopBtn})
+    @OnClick({R.id.scan_setting, R.id.scanBtn, R.id.stopBtn, R.id.qr_test_btn})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.scan_setting:
@@ -251,9 +264,85 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
                     ToastMaker.show(this, "已经停止扫描");
                 }
                 break;
+            case R.id.qr_test_btn:
+                String qrcode = qr_data_et.getText().toString().trim();
+                QNShareData qnShareData = QNUtils.decodeShareData(qrcode, createQNUser(), new QNResultCallback() {
+                    @Override
+                    public void onResult(int code, String msg) {
+                        QNLogUtils.log(TAG, "code:" + code);
+                    }
+                });
+                String result = "解析失败";
+                if (qnShareData != null) {
+                    result = "qnShareData--sn：" + qnShareData.getSn() +
+                            ";\nweight:" + qnShareData.getQnScaleData().getItemValue(QNIndicator.TYPE_WEIGHT) +
+                            ";\nfat:" + qnShareData.getQnScaleData().getItemValue(QNIndicator.TYPE_BODYFAT);
+
+                }
+                qr_data_tv.setText(result);
+                break;
         }
     }
 
+    private QNUser createQNUser() {
+        UserShape userShape;
+        switch (mUser.getChoseShape()) {
+            case 0:
+                userShape = UserShape.SHAPE_NONE;
+                break;
+            case 1:
+                userShape = UserShape.SHAPE_SLIM;
+                break;
+            case 2:
+                userShape = UserShape.SHAPE_NORMAL;
+                break;
+            case 3:
+                userShape = UserShape.SHAPE_STRONG;
+                break;
+            case 4:
+                userShape = UserShape.SHAPE_PLIM;
+                break;
+            default:
+                userShape = UserShape.SHAPE_NONE;
+                break;
+        }
+
+        UserGoal userGoal;
+        switch (mUser.getChoseGoal()) {
+            case 0:
+                userGoal = UserGoal.GOAL_NONE;
+                break;
+            case 1:
+                userGoal = UserGoal.GOAL_LOSE_FAT;
+                break;
+            case 2:
+                userGoal = UserGoal.GOAL_STAY_HEALTH;
+                break;
+            case 3:
+                userGoal = UserGoal.GOAL_GAIN_MUSCLE;
+                break;
+            case 4:
+                userGoal = UserGoal.POWER_OFTEN_EXERCISE;
+                break;
+            case 5:
+                userGoal = UserGoal.POWER_LITTLE_EXERCISE;
+                break;
+            case 6:
+                userGoal = UserGoal.POWER_OFTEN_RUN;
+                break;
+            default:
+                userGoal = UserGoal.GOAL_NONE;
+                break;
+        }
+
+        return mQNBleApi.buildUser(mUser.getUserId(),
+                mUser.getHeight(), mUser.getGender(), mUser.getBirthDay(), mUser.getAthleteType(), userShape, userGoal, new QNResultCallback() {
+                    @Override
+                    public void onResult(int code, String msg) {
+                        Log.d("ConnectActivity", "创建用户信息返回:" + msg);
+                    }
+                });
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

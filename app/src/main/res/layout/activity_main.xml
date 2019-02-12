@@ -35,6 +35,32 @@
         android:layout_margin="12dp"
         android:text="APP_ID : 123456789"/>
 
+    <EditText
+        android:id="@+id/qr_data_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="二维码扫描的数据"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/qr_test_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:text="qr_test"/>
+
+        <TextView
+            android:id="@+id/qr_data_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="解析的二维码数据"/>
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

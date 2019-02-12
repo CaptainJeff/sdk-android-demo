@@ -214,7 +214,7 @@ public class DatePickerDialog extends BaseDataPickerDialog {
 
             Calendar calender = Calendar.getInstance();
 
-            PickerData yearPk = new BaseDataPickerDialog.PickerData();
+            PickerData yearPk = new PickerData();
             yearPk.defaultValue = defaultYear;
             yearPk.unit = "年";
             yearPk.minValue = calender.get(Calendar.YEAR) - 80;
@@ -223,13 +223,13 @@ public class DatePickerDialog extends BaseDataPickerDialog {
             dialog.maxDate = maxDate;
             dialog.minDate = minDate;
 
-            PickerData monthPk = new BaseDataPickerDialog.PickerData();
+            PickerData monthPk = new PickerData();
             monthPk.maxValue = 12;
             monthPk.defaultValue = defaultMonth;
             monthPk.minValue = 1;
             monthPk.unit = "月";
 
-            PickerData dayPk = new BaseDataPickerDialog.PickerData();
+            PickerData dayPk = new PickerData();
             dayPk.maxValue = getMaxDay(defaultMonth,defaultYear);
             dayPk.defaultValue = defaultDay;
             dayPk.minValue = 1;

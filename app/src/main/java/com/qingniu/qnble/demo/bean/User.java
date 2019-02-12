@@ -37,6 +37,16 @@ public class User implements Parcelable {
      */
     private int athleteType;
 
+    /**
+     * 选择的体型
+     */
+    private int choseShape;
+
+    /**
+     * 选择的目标
+     */
+    private int choseGoal;
+
     public String getUserId() {
         return userId;
     }
@@ -80,6 +90,22 @@ public class User implements Parcelable {
         this.athleteType = athleteType;
     }
 
+    public int getChoseShape() {
+        return choseShape;
+    }
+
+    public void setChoseShape(int choseShape) {
+        this.choseShape = choseShape;
+    }
+
+    public int getChoseGoal() {
+        return choseGoal;
+    }
+
+    public void setChoseGoal(int choseGoal) {
+        this.choseGoal = choseGoal;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -92,6 +118,8 @@ public class User implements Parcelable {
         dest.writeString(this.gender);
         dest.writeLong(this.birthDay != null ? this.birthDay.getTime() : -1);
         dest.writeInt(this.athleteType);
+        dest.writeInt(this.choseShape);
+        dest.writeInt(this.choseGoal);
     }
 
     protected User(Parcel in) {
@@ -101,6 +129,8 @@ public class User implements Parcelable {
         long tmpBirthDay = in.readLong();
         this.birthDay = tmpBirthDay == -1 ? null : new Date(tmpBirthDay);
         this.athleteType = in.readInt();
+        this.choseShape = in.readInt();
+        this.choseGoal = in.readInt();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {

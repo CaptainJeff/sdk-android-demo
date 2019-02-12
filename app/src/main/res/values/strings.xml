@@ -17,4 +17,22 @@
     <string name="register_ok">确认</string>
     <string name="scan_out_time_remind">设置时间后，在指定时间内没有扫描到任何蓝牙设备，会回调错误信息</string>
     <string name="scan_time_remind">扫描持续时间,单位 ms，默认为0，即一直进行扫描，除非APP调用了stopBleDeviceDiscovery.不为0时，最小值为 3000ms 则会延时 duration ms的时间后，自动停止扫描。</string>
+
+    <string-array name="user_shape_des">
+        <item>未选择</item>
+        <item>纤瘦、苗条型</item>
+        <item>匀称、标准型</item>
+        <item>健美肌肉型</item>
+        <item>丰满、超重型</item>
+    </string-array>
+
+    <string-array name="user_goal_des">
+        <item>未选择</item>
+        <item>减脂</item>
+        <item>保持健康</item>
+        <item>增肌</item>
+        <item>每周数次力量型运动，如器械练习</item>
+        <item>基础不错，但缺乏系统性训练</item>
+        <item>每周数次有氧型运动，如跑步</item>
+    </string-array>
 </resources>
