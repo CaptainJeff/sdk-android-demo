@@ -65,6 +65,8 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @BindView(R.id.qr_data_et)
     EditText qr_data_et;
+    @BindView(R.id.qr_time_et)
+    EditText qr_time_et;
     @BindView(R.id.qr_data_tv)
     TextView qr_data_tv;
 
@@ -266,7 +268,18 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
                 break;
             case R.id.qr_test_btn:
                 String qrcode = qr_data_et.getText().toString().trim();
-                QNShareData qnShareData = QNUtils.decodeShareData(qrcode, createQNUser(), new QNResultCallback() {
+                long validSecond = -1L;
+                try {
+                    String qrValid = qr_time_et.getText().toString().trim();
+                    validSecond = Long.parseLong(qrValid);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (validSecond == -1) {
+                    ToastMaker.show(this, "请输入正确的有效时间!");
+                    return;
+                }
+                QNShareData qnShareData = QNUtils.decodeShareData(qrcode, validSecond, createQNUser(), new QNResultCallback() {
                     @Override
                     public void onResult(int code, String msg) {
                         QNLogUtils.log(TAG, "code:" + code);
