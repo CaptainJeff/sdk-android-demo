@@ -288,8 +288,8 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
                 String result = "解析失败";
                 if (qnShareData != null) {
                     result = "qnShareData--sn：" + qnShareData.getSn() +
-                            ";\nweight:" + qnShareData.getQnScaleData().getItemValue(QNIndicator.TYPE_WEIGHT) +
-                            ";\nfat:" + qnShareData.getQnScaleData().getItemValue(QNIndicator.TYPE_BODYFAT);
+                            ";\nweight:" + qnShareData.getQNScaleData().getItemValue(QNIndicator.TYPE_WEIGHT) +
+                            ";\nfat:" + qnShareData.getQNScaleData().getItemValue(QNIndicator.TYPE_BODYFAT);
 
                 }
                 qr_data_tv.setText(result);
