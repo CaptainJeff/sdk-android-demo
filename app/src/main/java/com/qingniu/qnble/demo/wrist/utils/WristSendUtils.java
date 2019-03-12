@@ -17,6 +17,7 @@ import com.yolanda.health.qnblesdk.listener.QNResultCallback;
 import com.yolanda.health.qnblesdk.out.QNBandManager;
 import com.yolanda.health.qnblesdk.out.QNUser;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -435,6 +436,31 @@ public class WristSendUtils {
     }
 
     /**
+     * 获取实时心率
+     */
+    public Observable<WristSettingItem> syncRealData(final WristSettingItem item) {
+        Observable<WristSettingItem> observable = Observable.create(new ObservableOnSubscribe<WristSettingItem>() {
+            @Override
+            public void subscribe(final ObservableEmitter<WristSettingItem> e) throws Exception {
+                mBandManager.syncRealTimeHeartRate(new QNObjCallback<Integer>() {
+                    @Override
+                    public void onResult(Integer heart, int code, String msg) {
+
+                        item.setChecked(code == CheckStatus.OK.getCode());
+                        item.setErrorCode(code);
+                        item.setErrorMsg(msg);
+                        item.setValue(heart + "");
+                        e.onNext(item);
+                        e.onComplete();
+                    }
+                });
+            }
+        });
+
+        return observable;
+    }
+
+    /**
      * 同步今天健康数据
      */
     public Observable<WristSettingItem> syncTodayHealthData(final WristSettingItem item) {
@@ -444,7 +470,12 @@ public class WristSendUtils {
                 mBandManager.syncTodayHealthData(new QNObjCallback<QNHealthData>() {
                     @Override
                     public void onResult(QNHealthData data, int code, String msg) {
-                        Log.d(TAG, "syncTodayHealthData:" + data);
+                        WristDataListener listener = WristDataListenerManager.getInstance().getListener();
+                        if (code == CheckStatus.OK.getCode() && listener != null) {
+                            List<QNHealthData> list = new ArrayList<QNHealthData>();
+                            list.add(data);
+                            listener.onAcceptData("syncTodayHealthData", list);
+                        }
                         item.setChecked(code == CheckStatus.OK.getCode());
                         item.setErrorCode(code);
                         item.setErrorMsg(msg);
@@ -468,7 +499,10 @@ public class WristSendUtils {
                 mBandManager.syncHistoryHealthData(new QNObjCallback<List<QNHealthData>>() {
                     @Override
                     public void onResult(List<QNHealthData> datas, int code, String msg) {
-                        Log.d(TAG, "syncHistoryHealthData:" + datas);
+                        WristDataListener listener = WristDataListenerManager.getInstance().getListener();
+                        if (code == CheckStatus.OK.getCode() && listener != null) {
+                            listener.onAcceptData("syncHistoryHealthData", datas);
+                        }
                         item.setChecked(code == CheckStatus.OK.getCode());
                         item.setErrorCode(code);
                         item.setErrorMsg(msg);

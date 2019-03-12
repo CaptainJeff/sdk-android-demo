@@ -39,7 +39,7 @@ public class WristSettingPresenter {
     /**
      * 手环交互发送工具类
      */
-    private WristSendUtils mSendUtils;
+    public WristSendUtils mSendUtils;
 
     /**
      * 构建设置数据
@@ -82,6 +82,12 @@ public class WristSettingPresenter {
         fetchInfoItem.setInfo("返回手环的设备信息");
         fetchInfoItem.setType(WristSettingConst.SETTING_BUTTON);
         items.add(fetchInfoItem);
+
+        WristSettingItem syncRealItem = new WristSettingItem();
+        syncRealItem.setName("获取实时心率");
+        syncRealItem.setInfo("获取手环记录的实时心率");
+        syncRealItem.setType(WristSettingConst.SETTING_BUTTON);
+        items.add(syncRealItem);
 
         WristSettingItem syncTodayItem = new WristSettingItem();
         syncTodayItem.setName("同步今日数据");
@@ -388,6 +394,9 @@ public class WristSettingPresenter {
             case "获取手环的信息":
                 observable = mSendUtils.fetchBandInfo(item);
                 break;
+            case "获取实时心率":
+                observable = mSendUtils.syncRealData(item);
+                break;
             case "同步今日数据":
                 observable = mSendUtils.syncTodayHealthData(item);
                 break;
@@ -420,9 +429,15 @@ public class WristSettingPresenter {
         observable.subscribe(new Consumer<WristSettingItem>() {
             @Override
             public void accept(WristSettingItem item) throws Exception {
-                if (item.getName().equals("校验绑定的手机")) {
-                    ToastMaker.show(mView.getCtx(), "当前手环和之前绑定的设备是否为同一个:" + item.isChecked());
+                switch (item.getName()) {
+                    case "校验绑定的手机":
+                        ToastMaker.show(mView.getCtx(), "当前手环和之前绑定的设备是否为同一个:" + item.isChecked());
+                        break;
+                    case "获取实时心率":
+                        ToastMaker.show(mView.getCtx(), "当前心率为:" + item.getValue());
+                        break;
                 }
+
                 mView.onSetupState(position, item);
             }
         });

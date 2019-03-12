@@ -7,6 +7,57 @@
 ### 混淆配置(proguard-rules)
 + -keep class com.qingniu.scale.model.BleScaleData{*;}
 
+## 注意事项
+- 必须在清单文件中申请蓝牙权限、位置权限、网络权限（离线SDK不需要）
+- SDK最低支持API版本为18
+- SDK中使用到了v4包的资源，开发者项目中需要引入v4包的依赖
+- 必须在清单文件中添加SDK需要使用到的服务：
+    ``` 
+  <service android:name="com.qingniu.qnble.scanner.BleScanService"/>
+  <service android:name="com.qingniu.scale.measure.ble.ScaleBleService"/>
+    ```    
+- 如果需要兼容广播秤，需要再注册如下服务：
+    ``` 
+  <service android:name="com.qingniu.scale.measure.broadcast.ScaleBroadcastService"/>
+    ```
+- 如果需要兼容手环，需要再注册如下服务：
+     ``` 
+   <service android:name="com.qingniu.wrist.ble.WristBleService"/>
+     ```
+- targetSdkVersion 在23及以上，需要先获取定位权限，才能扫描到设备，需要开发者自己申请
+- 如果你的项目是多进程的，建议限制在主进程才进行SDK的初始化
+
+## 常见问题
+
+1. 初始化提示appid错误
+    + 检查初始化文件和使用的appid是否匹配
+    + 检查引入的SDK是否是最新的
+2. 扫描设备调用成功，但是一直没有设备回调，且无错误回调
+    + 检查所扫描的设备，是否已经被其他人连接
+    + 部分手机需要开启GPS才能扫描到设备，请检查手机GPS是否开启
+3. 连接设备一直无法成功或者成功后很快就断开连接
+    + 检查设备是否被其他人连接了
+    + 在系统蓝牙中查看是否当前连接的设备已经被配对,如果已经配对，需要取消配对
+    + 部分手机需要先扫描才能连接成功，先扫描设备再进行连接
+4. 获取到的指标与和商务洽谈的指标数不同
+    + 先检查出现问题的设备，扫描时显示的名称是否正确
+    + 心率秤无论是否开放了心率指标，SDK都会下发心率指标
+5. 数据或者设备等监听回调，同一时间回调多次
+    + 先确定是否，设置了多次监听。当监听不使用时，一定要设置为null
+    + 确定是否是穿鞋测量，这个可能导致短时间内，完成多次测量的情况
+6. SDK返回无定位权限错误
+    + 检查是否对**ACCESS_COARSE_LOCATION**和**ACCESS_FINE_LOCATION**都进行了申请，SDK中对2个权限都进行了校验
+    + 是否编译版本26以及以上，如果是，2个权限都需要单独申请(8.0的新特性)
+7. SDK返回错误的文件,确认文件位置无异常，确认文件在demo中使用无异常
+    + 检查是否有添加so库
+    + 检查是否打包的apk文件中含有so库
+8. 手环发送命令提示发送失败
+    + 确认是否手环上是否有蓝牙图标
+    + 确认是否在SDK返回手环准备好的状态之后才调用的交互命令
+
+
+**`提示`**：遇到无法定位的问题，希望开发者能第一时间提供日志，以便我们尽快找到问题    
+
 ### 操作
 #### QNBleApi
 该类为SDK的主要工作类，提供SDK的各种方法的操作
@@ -58,41 +109,3 @@
 6. 构建连接秤的用户对象 `(QNBleApi)buildUser:String userId,int height,String gender,Date birthday,QNResultCallback callback`
 7. 连接设备 `connectDevice:QNBleDevice device,QNUser user,QNResultCallback callback`
 
-
-
-## 注意事项
-- 必须在清单文件中申请蓝牙权限、位置权限、网络权限（离线SDK不需要）
-- SDK最低支持API版本为18
-- SDK中使用到了v4包的资源，开发者项目中需要引入v4包的依赖
-- 必须在清单文件中添加SDK需要使用到的服务：
-    ``` 
-  <service android:name="com.qingniu.qnble.scanner.BleScanService"/>
-  <service android:name="com.qingniu.scale.measure.ble.ScaleBleService"/>
-    ```    
-- 如果需要兼容广播秤，需要再注册如下服务：
-    ``` 
-  <service android:name="com.qingniu.scale.measure.broadcast.ScaleBroadcastService"/>
-    ```
-- targetSdkVersion 在23及以上，需要先获取定位权限，才能扫描到设备，需要开发者自己申请
-- 如果你的项目是多进程的，建议限制在主进程才进行SDK的初始化
-
-## 常见问题
-
-1. 初始化提示appid错误
-    + 检查初始化文件和使用的appid是否匹配
-    + 检查引入的SDK是否是最新的
-2. 扫描设备调用成功，但是一直没有设备回调，且无错误回调
-    + 检查所扫描的设备，是否已经被其他人连接
-    + 部分手机需要开启GPS才能扫描到设备，请检查手机GPS是否开启
-3. 连接设备一直无法成功或者成功后很快就断开连接
-    + 检查设备是否被其他人连接了
-    + 在系统蓝牙中查看是否当前连接的设备已经被配对,如果已经配对，需要取消配对
-    + 部分手机需要先扫描才能连接成功，先扫描设备再进行连接
-4. 获取到的指标与和商务洽谈的指标数不同
-    + 先检查出现问题的设备，扫描时显示的名称是否正确
-    + 心率秤无论是否开放了心率指标，SDK都会下发心率指标
-5. 数据或者设备等监听回调，同一时间回调多次
-    + 先确定是否，设置了多次监听。当监听不使用时，一定要设置为null
-    + 确定是否是穿鞋测量，这个可能导致短时间内，完成多次测量的情况
-
-**`提示`**：遇到无法定位的问题，希望开发者能第一时间提供日志，以便我们尽快找到问题    

@@ -23,8 +23,9 @@ import com.qingniu.qnble.demo.util.ToastMaker;
 import com.qingniu.qnble.demo.util.UserConst;
 import com.qingniu.qnble.demo.wrist.mvp.WristSettingPresenter;
 import com.qingniu.qnble.demo.wrist.mvp.WristSettingView;
+import com.qingniu.qnble.demo.wrist.utils.WristDataListener;
+import com.qingniu.qnble.demo.wrist.utils.WristDataListenerManager;
 import com.yolanda.health.qnblesdk.constant.CheckStatus;
-import com.yolanda.health.qnblesdk.constant.QNDeviceStatus;
 import com.yolanda.health.qnblesdk.listener.QNBandEventListener;
 import com.yolanda.health.qnblesdk.listener.QNBleConnectionChangeListener;
 import com.yolanda.health.qnblesdk.listener.QNResultCallback;
@@ -39,6 +40,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.functions.Consumer;
 
 /**
  * @author: hekang
@@ -132,7 +134,17 @@ public class WristConnectActivity extends AppCompatActivity implements WristSett
 
         mHandler = new Handler();
 
+        WristDataListenerManager.getInstance().setListener(mListener);
+
     }
+
+    private WristDataListener mListener = new WristDataListener() {
+        @Override
+        public <T> void onAcceptData(String fromMethod, List<T> datas) {
+            startActivity(WristDataActivity.getCallIntent(WristConnectActivity.this, fromMethod, datas.toString()));
+        }
+
+    };
 
     /**
      * 监听手环数据变化
@@ -167,6 +179,17 @@ public class WristConnectActivity extends AppCompatActivity implements WristSett
                 if (device.getMac().equals(mWristDevice.getMac())) {
                     isConnected = true;
                     statusTv.setText("手环已连接");
+
+                    QNBandManager bandManager = mQNBleApi.getBandManager();
+                    presenter.setBandManager(bandManager);
+
+                    presenter.mSendUtils.syncTodayHealthData(new WristSettingItem())
+                            .subscribe(new Consumer<WristSettingItem>() {
+                                @Override
+                                public void accept(WristSettingItem item) throws Exception {
+
+                                }
+                            });
                 }
             }
 
@@ -197,11 +220,19 @@ public class WristConnectActivity extends AppCompatActivity implements WristSett
             @Override
             public void onDeviceStateChange(QNBleDevice device, int status) {
                 if (device.getMac().equals(mWristDevice.getMac())) {
-                    if (status == QNDeviceStatus.STATE_READY) {
-                        isReady = true;
-                        QNBandManager bandManager = mQNBleApi.getBandManager();
-                        presenter.setBandManager(bandManager);
-                    }
+//                    if (status == QNDeviceStatus.STATE_READY) {
+//                        isReady = true;
+//                        QNBandManager bandManager = mQNBleApi.getBandManager();
+//                        presenter.setBandManager(bandManager);
+//
+//                        presenter.mSendUtils.syncTodayHealthData(new WristSettingItem())
+//                                .subscribe(new Consumer<WristSettingItem>() {
+//                                    @Override
+//                                    public void accept(WristSettingItem item) throws Exception {
+//
+//                                    }
+//                                });
+//                    }
                 }
             }
 
@@ -237,6 +268,7 @@ public class WristConnectActivity extends AppCompatActivity implements WristSett
     protected void onDestroy() {
         mQNBleApi.setBleConnectionChangeListener(null);
         mQNBleApi.setDataListener(null);
+        WristDataListenerManager.getInstance().setListener(null);
         super.onDestroy();
     }
 

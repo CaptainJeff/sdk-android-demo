@@ -10,6 +10,17 @@
     <style name="LauncherTheme" parent="android:Theme.NoTitleBar">
         <item name="android:windowFullscreen">true</item>
     </style>
+    
+    <!--dialog页面主题-->
+    <style name="ProjectDialogTheme" parent="@style/Theme.AppCompat.Dialog">
+        <item name="android:windowActionBar">false</item><!-- 取消Actionbar-->
+        <item name="android:windowNoTitle">true</item><!-- Activity无标题-->
+        <item name="windowNoTitle">true</item><!-- 去除app名字的标题-->
+        <item name="android:windowFullscreen">true</item><!-- 设置全屏-->
+        <item name="android:screenOrientation">landscape</item><!-- 设置横屏-->
+        <item name="android:windowBackground">@android:color/transparent</item><!-- dialog外无背景-->
+        <item name="android:windowCloseOnTouchOutside">false</item><!-- dialog外点击无效果-->
+    </style>
 
     <style name="timePickerActivity" parent="AppTheme">
         <item name="numberPickerStyle">@style/NPWidget.Holo.Light.NumberPicker</item>
