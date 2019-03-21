@@ -27,7 +27,7 @@ import com.qingniu.qnble.demo.util.ToastMaker;
 import com.qingniu.qnble.demo.util.UserConst;
 import com.qingniu.qnble.demo.wrist.WristConnectActivity;
 import com.qingniu.qnble.utils.QNLogUtils;
-import com.qingniu.scale.constant.BleConst;
+import com.qingniu.wrist.constant.WristType;
 import com.yolanda.health.qnblesdk.constant.CheckStatus;
 import com.yolanda.health.qnblesdk.listener.QNBleDeviceDiscoveryListener;
 import com.yolanda.health.qnblesdk.listener.QNResultCallback;
@@ -144,6 +144,7 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onStopScan() {
                 QNLogUtils.log("ScanActivity", "onStopScan");
+                ToastMaker.show(ScanActivity.this, "已经停止扫描");
                 isScanning = false;
 
             }
@@ -225,7 +226,7 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void connectDevice(QNBleDevice device) {
-        if (device.getScaleCategory() == BleConst.WRIST_BLE_DEFAULT) {
+        if (device.getScaleCategory() == WristType.WRIST_BLE_DEFAULT) {
             startActivity(WristConnectActivity.getCallIntent(this, mUser, device));
         } else {
             startActivity(ScaleConnectActivity.getCallIntent(this, mUser, device));
@@ -250,11 +251,8 @@ public class ScanActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
                 break;
             case R.id.stopBtn:
-                if (isScanning) {
-                    stopScan();
-                } else {
-                    ToastMaker.show(this, "已经停止扫描");
-                }
+                stopScan();
+
                 break;
         }
     }

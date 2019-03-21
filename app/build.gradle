@@ -63,7 +63,7 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.5.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
     testCompile 'junit:junit:4.12'
-    compile files('libs/qnsdk-1.0.0-beta.2.jar')
+    compile files('libs/qnsdk-1.0.0-beta.3.jar')
 
     //rxjava依赖--start
     compile("io.reactivex.rxjava2:rxandroid:$RX_JAVA2_VERSION") {

@@ -29,7 +29,7 @@ import com.qingniu.qnble.demo.util.UserConst;
 import com.qingniu.qnble.demo.wrist.WristConnectActivity;
 import com.qingniu.qnble.utils.BleUtils;
 import com.qingniu.qnble.utils.QNLogUtils;
-import com.qingniu.scale.constant.BleConst;
+import com.qingniu.wrist.constant.WristType;
 import com.yolanda.health.qnblesdk.constant.CheckStatus;
 import com.yolanda.health.qnblesdk.listener.QNResultCallback;
 import com.yolanda.health.qnblesdk.out.QNBleApi;
@@ -217,7 +217,7 @@ public class SystemScanActivity extends AppCompatActivity implements AdapterView
     }
 
     private void connectDevice(QNBleDevice device) {
-        if (device.getScaleCategory() == BleConst.WRIST_BLE_DEFAULT) {
+        if (device.getScaleCategory() == WristType.WRIST_BLE_DEFAULT) {
             startActivity(WristConnectActivity.getCallIntent(this, mUser, device));
         } else {
             startActivity(ScaleConnectActivity.getCallIntent(this, mUser, device));
