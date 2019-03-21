@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.qingniu.qnble.demo.R;
 import com.qingniu.qnble.demo.bean.User;
 import com.qingniu.qnble.demo.util.UserConst;
+import com.qingniu.scale.constant.DecoderConst;
 import com.yolanda.health.qnblesdk.constant.QNDeviceStatus;
 import com.yolanda.health.qnblesdk.constant.QNIndicator;
 import com.yolanda.health.qnblesdk.constant.UserGoal;
@@ -247,6 +248,9 @@ public class ScaleConnectActivity extends AppCompatActivity implements View.OnCl
 
             @Override
             public void onGetElectric(QNBleDevice device, int electric) {
+                if (electric == DecoderConst.NONE_BATTERY_VALUE) {//表示无法获取到正确的电量信息
+                    return;
+                }
                 String text = "收到电池电量百分比:" + electric;
                 Log.d("ScaleConnectActivity", text);
                 Toast.makeText(ScaleConnectActivity.this, text, Toast.LENGTH_SHORT).show();
