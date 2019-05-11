@@ -6,7 +6,6 @@
     <!--23之后的蓝牙需要添加以下权限,且需要动态申请-->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <!--读写文件权限-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <!--网络权限-->
@@ -16,6 +15,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <!--SDK中需要的权限 end-->
 
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <application
         android:name=".BaseApplication"
         android:allowBackup="true"
@@ -33,6 +34,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".ScanQrActivity"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".view.ScanActivity"
