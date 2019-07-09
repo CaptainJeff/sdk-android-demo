@@ -26,6 +26,7 @@ import com.qingniu.qnble.demo.wrist.mvp.WristSettingView;
 import com.qingniu.qnble.demo.wrist.utils.WristDataListener;
 import com.qingniu.qnble.demo.wrist.utils.WristDataListenerManager;
 import com.yolanda.health.qnblesdk.constant.CheckStatus;
+import com.yolanda.health.qnblesdk.constant.QNDeviceStatus;
 import com.yolanda.health.qnblesdk.listener.QNBandEventListener;
 import com.yolanda.health.qnblesdk.listener.QNBleConnectionChangeListener;
 import com.yolanda.health.qnblesdk.listener.QNResultCallback;
@@ -220,19 +221,19 @@ public class WristConnectActivity extends AppCompatActivity implements WristSett
             @Override
             public void onDeviceStateChange(QNBleDevice device, int status) {
                 if (device.getMac().equals(mWristDevice.getMac())) {
-//                    if (status == QNDeviceStatus.STATE_READY) {
-//                        isReady = true;
-//                        QNBandManager bandManager = mQNBleApi.getBandManager();
-//                        presenter.setBandManager(bandManager);
-//
-//                        presenter.mSendUtils.syncTodayHealthData(new WristSettingItem())
-//                                .subscribe(new Consumer<WristSettingItem>() {
-//                                    @Override
-//                                    public void accept(WristSettingItem item) throws Exception {
-//
-//                                    }
-//                                });
-//                    }
+                    if (status == QNDeviceStatus.STATE_READY) {
+                        isReady = true;
+                        QNBandManager bandManager = mQNBleApi.getBandManager();
+                        presenter.setBandManager(bandManager);
+
+                        presenter.mSendUtils.syncTodayHealthData(new WristSettingItem())
+                                .subscribe(new Consumer<WristSettingItem>() {
+                                    @Override
+                                    public void accept(WristSettingItem item) throws Exception {
+
+                                    }
+                                });
+                    }
                 }
             }
 
